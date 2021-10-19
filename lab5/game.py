@@ -9,6 +9,7 @@ pygame.init()
 
 FPS = 60
 screen = pygame.display.set_mode((1200, 600))
+SONG_END = pygame.USEREVENT + 1
 
 # Задаем цвета
 RED = (255, 0, 0)
@@ -68,7 +69,9 @@ def new_square():
 pygame.display.update()
 clock = pygame.time.Clock()
 font = pygame.font.Font(None, 20)
+pygame.mixer.music.set_volume(0)
 # Логические переменые для перехода между меню
+chosen_music = "No music"
 finished = False
 start_menu = True
 viewing_scoreboard = False
@@ -83,6 +86,7 @@ for line in scoreboard_f:
 # Задаем переменные для игры
 obj_list = []
 plr_name = "player"
+music_volume = 0
 obj_spawn_delay = 0
 score = 0
 alphabet = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
@@ -96,27 +100,92 @@ while not finished:
     # Стартовое меню
     if start_menu:
 
-        rect(screen, WHITE, (0, 500, 1200, 100))
-        write_your_name_text = font.render("Write your name:", True, [255, 255, 255])
-        plr_name_text = font.render(plr_name, True, [255, 255, 255])
-        confirm_text = font.render("Confirm", True, [0, 0, 0])
+        write_your_name_text = font.render("Write your name:", True, WHITE)
+        plr_name_text = font.render(plr_name, True, WHITE)
         screen.blit(write_your_name_text, (520, 200))
         screen.blit(plr_name_text, (580 - 4 * len(plr_name), 230))
+        # Кнопка confirm
+        rect(screen, WHITE, (0, 500, 1200, 100))
+        confirm_text = font.render("Confirm", True, BLACK)
         screen.blit(confirm_text, (550, 545))
+        # Выбор музыки
+        rect(screen, WHITE, (1000, 200, 200, 180))
+        rect(screen, BLACK, (1001, 201, 198, 178))
+        if chosen_music == "No music":
+            rect(screen, WHITE, (1000, 200, 200, 60))
+            no_music_text = font.render("No music", True, BLACK)
+        else:
+            no_music_text = font.render("No music", True, WHITE)
+
+        if chosen_music == "Piano":
+            rect(screen, WHITE, (1000, 260, 200, 60))
+            piano_text = font.render("Piano", True, BLACK)
+        else:
+            piano_text = font.render("Piano", True, WHITE)
+
+        if chosen_music == "Dubstep":
+            rect(screen, WHITE, (1000, 320, 200, 60))
+            dubstep_text = font.render("Dubstep", True, BLACK)
+        else:
+            dubstep_text = font.render("Dubstep", True, WHITE)
+
+        music_text = font.render("Music:", True, WHITE)
+        screen.blit(music_text, (1075, 180))
+        screen.blit(no_music_text, (1050, 225))
+        screen.blit(piano_text, (1050, 285))
+        screen.blit(dubstep_text, (1050, 345))
+
+        # Громкость
+        rect(screen, WHITE, (940, 200, 60, 180))
+        rect(screen, BLACK, (941, 201, 58, 178))
+        rect(screen, WHITE, (940, 380 - music_volume, 60, music_volume))
+
+        volume_text = font.render("Volume:", True, WHITE)
+        screen.blit(volume_text, (945, 180))
 
         # Обработка событий (в т.ч. ввод имени)
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                print(event.key)
             if event.type == pygame.QUIT:
                 finished = True
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if event.pos[1] > 500:
                     start_menu = False
+                # Выбор музыки
+                if event.pos[0] >= 1000:
+                    if 200 <= event.pos[1] < 260:
+                        chosen_music = "No music"
+                        pygame.mixer.music.stop()
+                    if 260 <= event.pos[1] < 320:
+                        chosen_music = "Piano"
+                        pygame.mixer.music.load("piano.mp3")
+                        pygame.mixer.music.play()
+                        pygame.mixer.music.set_endevent(SONG_END)
+                    if 320 <= event.pos[1] < 380:
+                        chosen_music = "Dubstep"
+                        pygame.mixer.music.load("dubstep.mp3")
+                        pygame.mixer.music.play()
+                        pygame.mixer.music.set_endevent(SONG_END)
+                # Ползунок громкости
+                if 1000 > event.pos[0] >= 940 and 200 <= event.pos[1] < 380:
+                    music_volume = 380 - event.pos[1]
+                    pygame.mixer.music.set_volume(music_volume/180)
+
+            elif event.type == pygame.KEYDOWN and event.key == 13:
+                start_menu = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE and len(plr_name) > 0:
                 plr_name = plr_name[:len(plr_name) - 1]
             elif event.type == pygame.KEYDOWN and 96 < event.key < 123:
                 plr_name += chr(event.key)
+            # Начало трека заново, если он кончился
+            elif event.type == SONG_END:
+                if chosen_music == "Piano":
+                    pygame.mixer.music.load("piano.mp3")
+                    pygame.mixer.music.play()
+                    pygame.mixer.music.set_endevent(SONG_END)
+                if chosen_music == "Dubstep":
+                    pygame.mixer.music.load("dubstep.mp3")
+                    pygame.mixer.music.play()
+                    pygame.mixer.music.set_endevent(SONG_END)
 
     # Финальное меню со счетом
     elif viewing_scoreboard:
@@ -130,6 +199,16 @@ while not finished:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 finished = True
+            # Начало трека заново, если он кончился
+            elif event.type == SONG_END:
+                if chosen_music == "Piano":
+                    pygame.mixer.music.load("piano.mp3")
+                    pygame.mixer.music.play()
+                    pygame.mixer.music.set_endevent(SONG_END)
+                if chosen_music == "Dubstep":
+                    pygame.mixer.music.load("dubstep.mp3")
+                    pygame.mixer.music.play()
+                    pygame.mixer.music.set_endevent(SONG_END)
 
     # Меню игры
     else:
@@ -193,9 +272,23 @@ while not finished:
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 viewing_scoreboard = True
 
+                # Запись текущего счета в таблицу, ее сортировка
+                scoreboard.append([plr_name, str(score)])
+                scoreboard.sort(key=__func_sort)
+            # Начало трека заново, если он кончился
+            elif event.type == SONG_END:
+                if chosen_music == "Piano":
+                    pygame.mixer.music.load("piano.mp3")
+                    pygame.mixer.music.play()
+                    pygame.mixer.music.set_endevent(SONG_END)
+                if chosen_music == "Dubstep":
+                    pygame.mixer.music.load("dubstep.mp3")
+                    pygame.mixer.music.play()
+                    pygame.mixer.music.set_endevent(SONG_END)
+
         # Отрисовка текста
-        score_text = font.render("Your score: " + str(score), True, [255, 255, 255])
-        exit_text = font.render("Press escape to finish game and view scoreboard", True, [255, 255, 255])
+        score_text = font.render("Your score: " + str(score), True, WHITE)
+        exit_text = font.render("Press escape to finish game and view scoreboard", True, WHITE)
         screen.blit(score_text, (10, 10))
         screen.blit(exit_text, (10, 25))
 
@@ -203,9 +296,7 @@ while not finished:
     pygame.display.update()
     screen.fill(BLACK)
 
-# Добавление текущего счета в таблицу, ее сортировка и запись в файл, выход из программы
-scoreboard.append([plr_name, str(score)])
-scoreboard.sort(key=__func_sort)
+# Запись таблицы счета в файл, выход из программы
 scoreboard_f = open("scoreboard.txt", 'w')
 for item in scoreboard:
     scoreboard_f.write(" ".join(item) + '\n')
