@@ -1,4 +1,5 @@
 import math
+import random
 from random import choice
 from random import randint as rnd
 import pygame
@@ -159,16 +160,23 @@ class Target:
     def __init__(self, screen: pygame.Surface):
         """ Инициализация новой цели. """
         self.points = 0
-        x = self.x = rnd(600, 750)
-        y = self.y = rnd(100, 450)
-        r = self.r = rnd(5, 50)
+        self.new_target()
         self.screen = screen
+
         color = self.color = RED
 
     def new_target(self):
-        x = self.x = rnd(600, 750)
-        y = self.y = rnd(100, 450)
-        r = self.r = rnd(5, 50)
+        self.x = rnd(600, 750)
+        self.y = rnd(100, 450)
+        self.r = rnd(5, 50)
+        rand = random.random()
+        self.v = (rand + 1) * ((rand - 0.5) / abs(rand - 0.5))
+
+    def move(self):
+        if 500 - self.r > self.y + self.v > self.r:
+            self.y += self.v
+        else:
+            self.v *= -1
 
     def hit(self, points=1):
         """Попадание шарика в цель."""
@@ -194,22 +202,25 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 shots = 0
 balls = []
-font = pygame.font.Font(None, 24)
+font = pygame.font.Font(None, 20)
 target_spawn_delay = 0
-score = 0
 
 clock = pygame.time.Clock()
 gun = Gun(screen)
 target = Target(screen)
+target2 = Target(screen)
 finished = False
 
 while not finished:
+    score_text = font.render(str(target.points + target2.points), True, BLACK)
     screen.fill(WHITE)
     gun.draw()
+    screen.blit(score_text, (10, 15))
     if target_spawn_delay == 0:
         target.draw()
+        target2.draw()
     else:
-        screen.blit(delay_text, (260, 300))
+        screen.blit(delay_text, (280, 300))
         target_spawn_delay -= 1
     for b in balls:
         b.draw()
@@ -238,6 +249,15 @@ while not finished:
             delay_text = font.render("Вы уничтожили цель за " + str(shots) + " выстрелов", True, BLACK)
             shots = 0
             target.new_target()
+        if b.hittest(target2) and target_spawn_delay == 0:
+            target2.hit()
+            target_spawn_delay = 90
+            delay_text = font.render("Вы уничтожили цель за " + str(shots) + " выстрелов", True, BLACK)
+            shots = 0
+            target2.new_target()
+    if target_spawn_delay == 0:
+        target.move()
+        target2.move()
     gun.power_up()
 
 pygame.quit()
