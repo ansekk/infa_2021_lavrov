@@ -39,6 +39,7 @@ def execution():
         update_object_position(space, body)
     physical_time += time_step.get()
     displayed_time.set("%.1f" % physical_time + " seconds gone")
+    calculate_scale_factor(max([max(abs(obj.x), abs(obj.y)) for obj in space_objects]))
 
     if perform_execution:
         space.after(101 - int(time_speed.get()), execution)

@@ -25,7 +25,6 @@ def calculate_scale_factor(max_distance):
     """Вычисляет значение глобальной переменной **scale_factor** по данной характерной длине"""
     global scale_factor
     scale_factor = 0.4*min(window_height, window_width)/max_distance
-    print('Scale factor:', scale_factor)
 
 
 def scale_x(x):
@@ -57,6 +56,18 @@ def scale_y(y):
     return int(-y*scale_factor) + window_height//2
 
 
+def scale_r(r):
+    """Возвращает экранный размер **r**.
+       Принимает вещественное число, возвращает целое число.
+
+       Параметры:
+
+       **r** — величина r.
+       """
+
+    return int(r * scale_factor)
+
+
 def create_star_image(space, star):
     """Создаёт отображаемый объект звезды.
 
@@ -68,7 +79,7 @@ def create_star_image(space, star):
 
     x = scale_x(star.x)
     y = scale_y(star.y)
-    r = star.R
+    r = scale_r(star.R)
     star.image = space.create_oval([x - r, y - r], [x + r, y + r], fill=star.color)
 
 
@@ -82,7 +93,7 @@ def create_planet_image(space, planet):
     """
     x = scale_x(planet.x)
     y = scale_y(planet.y)
-    r = planet.R
+    r = scale_r(planet.R)
     planet.image = space.create_oval([x - r, y - r], [x + r, y + r], fill=planet.color)
 
 
@@ -108,7 +119,7 @@ def update_object_position(space, body):
     """
     x = scale_x(body.x)
     y = scale_y(body.y)
-    r = body.R
+    r = scale_r(body.R)
     if x + r < 0 or x - r > window_width or y + r < 0 or y - r > window_height:
         space.coords(body.image, window_width + r, window_height + r,
                      window_width + 2*r, window_height + 2*r)  # положить за пределы окна
