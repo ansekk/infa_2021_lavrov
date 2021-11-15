@@ -1,15 +1,12 @@
-scoreboard_in = open('scoreboard.txt', 'r')
-scoreboard = []
+def f(x):
+    return 1/(x**10)+x
 
 
-def funcSort(x):
-    return int(x[1])
+x = 2
+n = 1024
+for i in range(n):
+    print(x)
+    x = f(x)
 
-
-for line in scoreboard_in:
-    current = line.split()
-    scoreboard.append([current[0], current[1]])
-
-print(scoreboard)
-scoreboard.sort(key=funcSort)
-print(scoreboard)
+print("=============")
+print((2 * n) ** 0.5)
