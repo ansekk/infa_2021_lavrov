@@ -139,7 +139,6 @@ def main():
     load_file_button.pack(side=tkinter.LEFT)
     save_file_button = tkinter.Button(frame, text="Save to file...", command=save_file_dialog)
     save_file_button.pack(side=tkinter.LEFT)
-
     displayed_time = tkinter.StringVar()
     displayed_time.set(str(physical_time) + " seconds gone")
     time_label = tkinter.Label(frame, textvariable=displayed_time, width=30)

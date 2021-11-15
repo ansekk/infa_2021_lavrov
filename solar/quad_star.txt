@@ -1,0 +1,4 @@
+Star 20 white 1E30 0 1E10 -40E3 0
+Star 20 cyan 1E30 -1E10 0 0 -40E3
+Star 20 red 1E30 1E10 0 0 40E3
+Star 20 red 1E30 0 -1E10 40E3 0
